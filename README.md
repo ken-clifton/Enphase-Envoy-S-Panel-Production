@@ -10,6 +10,7 @@ The script changes the background color of each table cell using RGB() color val
 
 This Python script was created to run on Python 3.5 on most operating systems.
 It has been tested on Pythonista version 3 on the iPad as well.
+A post with more information is available at: http://www.kenclifton.com/wordpress/2017/06/enphase-envoy-s-per-panel-python-script-walkthrough/
 
 The script writes out a plain HTML file named: envoy-production.html , then opens that html in the local Web browser.
 
