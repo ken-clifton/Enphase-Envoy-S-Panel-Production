@@ -14,4 +14,5 @@ It has been tested on Pythonista version 3 on the iPad as well.
 The script writes out a plain HTML file named: envoy-production.html , then opens that html in the local Web browser.
 
 A sample of the script output follows:
+
 ![Screenshot of Solar Production](production-screenshot.png)
