@@ -50,6 +50,17 @@ array_to_serial = \
 '121312345690' \
 ]
 
+# Defines an array of tuples that defines the name of each array and the number of panels in each one
+# Panels in the array_to_serial data structure above should be listed in the same order they are grouped
+# in the list of array location tuples below. Each tuple should be formatted as:
+# ("Array Name", Number of panels in the array)
+array_to_loc = \
+[ \
+  ("East Array",12),
+  ("Center Array",12),
+  ("West Array",12) \
+]
+
 #--------------------------------------------------------------------------------------------------------------------------------------# 
 # Name:               show-production.py
 #
@@ -82,6 +93,7 @@ last_report = [None]  * len(array_to_serial)
 table_index = 0  # this index is incremented inside the writePVArrayTable() function
 
 import datetime
+from math import ceil
 
 def convertJsonDatetoPython( jsonDate ):
 	# convert installed date from JSON seconds value to Python date format
@@ -92,28 +104,46 @@ def convertJsonDatetoPython( jsonDate ):
 	# end of  convertJsonDatetoPython() function
 	# -----------------------------------------------------------------
 
-def writePVArrayTable( outFile ):
+def writePVArrayTable( outFile, size ):
 	# writes out a table for 12 inverters in a 4 x 3 table using the table_index which is incremented inside this function
 	global table_index  # make table_index writable 
 	outFile.write("<table border='1' cellpadding='2'>" + "\n")
 	outFile.write("<tbody>" + "\n")
 
-	for row in range(3):
+        # table size
+	num_cols = 4
+	num_rows = ceil(size/num_cols)
+	max_index = table_index + size
+
+	for row in range(num_rows):
 		outFile.write("<tr>" + "\n")
 
-		for column in range(4):
+		for column in range(num_cols):
+
+                        # if we have reached our max_index, continue
+			if table_index >= max_index:
+				continue
+
 			# derive values to color the table cells
-			blue_value = current_power[table_index]
+			try:
+				blue_value = current_power[table_index]
+			except IndexError:
+				continue
+
 			green_value = blue_value - 30
 			if green_value < 0:
 				green_value = 0
 			rgb = 'rgb(0, ' + str(green_value) + ', ' + str(blue_value) + ');'
-			outFile.write("<td style='vertical-align: top; width: 60px; height: 79px; background-color: " + \
-			rgb + " font-size: 10px; font-weight: bold; color: white;'>" + "\n" )
+			outFile.write("<td style='vertical-align: top; width: 10vw; height: 150px; background-color: " + \
+			rgb + " font-size: 1em; font-weight: bold; color: white;'>" + "\n" )
 			
+			power_color = "#00ff00"
+			if current_power[table_index] >= max_power[table_index]:
+				power_color = "#b30000"
+
 			outFile.write( array_to_serial[table_index] + '<br>' +"\n")
 			outFile.write( '<br>' +"\n")
-			outFile.write('Current :' + str(current_power[table_index]) + 'w<br>' +"\n")
+			outFile.write('Current : <font color='+power_color+'>' + str(current_power[table_index]) + 'w</font><br>' +"\n")
 			outFile.write('Max: ' +  str(max_power[table_index]) + 'w<br>' +"\n")
 			outFile.write('Last Rpt: ' + last_report[table_index] + '<br>' +"\n")
 			outFile.write("</td>" + "\n" )
@@ -216,14 +246,9 @@ def main():
 	global table_index   # make table_index variable writeable from all functions
 	table_index = 0  # this index is incremented inside the writePVArrayTable() function
 
-	outFileRef.write("<p>East Array</p>" + "\n")
-	writePVArrayTable( outFileRef )
-
-	outFileRef.write("<p>Center Array</p>" + "\n")
-	writePVArrayTable( outFileRef )
-
-	outFileRef.write("<p>West Array</p>" + "\n")
-	writePVArrayTable( outFileRef )
+	for name,size in array_to_loc:
+		outFileRef.write("<p style='font-size:1.5em'><b>"+name+"</b></p>" + "\n")
+		writePVArrayTable( outFileRef, size )
 
 	# write out end of the web page
 	outFileRef.write("</body>"+ "\n")
