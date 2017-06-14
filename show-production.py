@@ -130,6 +130,10 @@ def writePVArrayTable( outFile, size ):
 			except IndexError:
 				continue
 
+			# allow for higher powered modules with power exceeding 255 watts
+			if blue_value > 255:
+				blue_value = 255
+				
 			green_value = blue_value - 30
 			if green_value < 0:
 				green_value = 0
